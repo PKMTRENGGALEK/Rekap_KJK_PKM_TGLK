@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Pegawai - Kesehatan</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+      crossorigin="anonymous"
+    />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f8f9fa;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+        margin-top: 50px;
+      }
+
+      .loading-screen {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        color: #3d6d27;
+        font-weight: bold;
+        z-index: 9999;
+      }
+
+      h3 {
+        color: #3d6d27;
+        margin-bottom: 20px;
+      }
+
+      .red-text {
+        color: red;
+        font-weight: bold;
+      }
+
+      .table-container {
+        max-height: 500px;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      thead tr {
+        position: sticky;
+        top: 0;
+        background-color: #f2f2f2;
+        z-index: 100;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+      }
+
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading-screen" id="loading-screen">Memuat data...</div>
+    <div class="container" style="display: none" id="content">
+      <h3 class="text-center">
+        Data KJK Pegawai Puskesmas Trenggalek Tahun 2025
+      </h3>
+      <input
+        type="text"
+        id="search-box"
+        class="form-control mb-3"
+        placeholder="Cari nama pegawai..."
+      />
+      <div class="table-container">
+        <table class="table table-striped" id="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Pegawai</th>
+              <th>
+                <a
+                  href="https://drive.google.com/file/d/1O_lHU41gc0ffVyGDXtqlMIgNDtfPcXk8/view?usp=sharing"
+                  target="_blank"
+                >
+                  Januari</a
+                >
+              </th>
+              <th>Februari</th>
+              <th>Maret</th>
+              <th>April</th>
+              <th>Mei</th>
+              <th>Juni</th>
+              <th>Juli</th>
+              <th>Agustus</th>
+              <th>September</th>
+              <th>Oktober</th>
+              <th>November</th>
+              <th>Desember</th>
+              <th>KJK Tahunan</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      function formatTime(dateString) {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) ? "-" : date.toISOString().substr(11, 8);
+      }
+
+      function sumHours(data) {
+        let totalSeconds = 0;
+        [
+          "Januari",
+          "Februari",
+          "Maret",
+          "April",
+          "Mei",
+          "Juni",
+          "Juli",
+          "Agustus",
+          "September",
+          "Oktober",
+          "November",
+          "Desember",
+        ].forEach((month) => {
+          if (data[month]) {
+            const timeParts = formatTime(data[month]).split(":");
+            if (timeParts.length === 3) {
+              totalSeconds +=
+                parseInt(timeParts[0]) * 3600 +
+                parseInt(timeParts[1]) * 60 +
+                parseInt(timeParts[2]);
+            }
+          }
+        });
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      }
+
+      $(document).ready(function () {
+        const loadingScreen = $("#loading-screen");
+        const content = $("#content");
+        const tableBody = $("#data-table tbody");
+
+        fetch(
+          "https://script.google.com/macros/s/AKfycbwI165_omCCW1HIW10F9hJjq0nFl70oUYpglonVG8EygQkadgoLZA5hRLv-5YdRhelL/exec?action=get-data"
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Jaringan error atau API tidak dapat diakses.");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            loadingScreen.fadeOut(500, function () {
+              content.fadeIn(500);
+            });
+            if (data.success && Array.isArray(data.data)) {
+              data.data.forEach((item) => {
+                const kjkTahunan = sumHours(item);
+                const isOverLimit = kjkTahunan > "21:00:00";
+                const row = `<tr>
+                              <td>${item.No}</td>
+                              <td style="text-align:left;" class="pegawai-name">${
+                                item.Nama_Pegawai
+                              }</td>
+                              <td>${formatTime(item.Januari)}</td>
+                              <td>${formatTime(item.Februari)}</td>
+                              <td>${formatTime(item.Maret)}</td>
+                              <td>${formatTime(item.April)}</td>
+                              <td>${formatTime(item.Mei)}</td>
+                              <td>${formatTime(item.Juni)}</td>
+                              <td>${formatTime(item.Juli)}</td>
+                              <td>${formatTime(item.Agustus)}</td>
+                              <td>${formatTime(item.September)}</td>
+                              <td>${formatTime(item.Oktober)}</td>
+                              <td>${formatTime(item.November)}</td>
+                              <td>${formatTime(item.Desember)}</td>
+                              <td class="${
+                                isOverLimit ? "red-text" : ""
+                              }">${kjkTahunan}</td>
+                            </tr>`;
+                tableBody.append(row);
+              });
+            }
+          });
+
+        $("#search-box").on("keyup", function () {
+          const value = $(this).val().toLowerCase();
+          $("#data-table tbody tr").filter(function () {
+            $(this).toggle(
+              $(this)
+                .find(".pegawai-name")
+                .text()
+                .toLowerCase()
+                .indexOf(value) > -1
+            );
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
