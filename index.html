@@ -141,9 +141,18 @@
           <tbody></tbody>
         </table>
       </div>
-      <button id="export-btn" class="btn btn-success shadow mt-3">
-        Export ke Excel
-      </button>
+       <div class="position-relative">
+        <button id="export-btn" class="btn btn-success shadow mt-3">
+          Export ke Excel
+        </button>
+        <button
+          id="refresh-btn"
+          class="btn btn-warning shadow mt-3 position-absolute end-0"
+          onclick="location.reload()"
+        >
+          Refresh
+        </button>
+      </div>
     </div>
     <script>
       function formatTime(dateString) {
