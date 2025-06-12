@@ -121,23 +121,35 @@
                   Januari</a
                 >
               </th>
-              <th> <a
+              <th>
+                <a
                   href="https://drive.google.com/drive/folders/1HFEDbpoD0xDOlBOxuUkRdq5jGvgnctTI?usp=sharing"
                   target="_blank"
-                >Februari</a></th>
-              <th><a
+                  >Februari</a
+                >
+              </th>
+              <th>
+                <a
                   href="https://drive.google.com/file/d/1PpO-G0GGh7AOmTafQvQoZ9akuJxt2Wrq/view?usp=drive_link"
                   target="_blank"
-                >Maret</a></th>
-              <th><a
+                  >Maret</a
+                >
+              </th>
+              <th>
+                <a
                   href="https://drive.google.com/file/d/1Vtdw2V8N8ZcDAWfoyOd54AVj0eWwpKFH/view?usp=sharing"
                   target="_blank"
-                >April</a></th>
-<!--               https://drive.google.com/file/d/1QoeJt912K67kyxjHLie9JNTaY2422dlw/view?usp=sharing -->
-              <th><a
+                  >April</a
+                >
+              </th>
+              <!--               https://drive.google.com/file/d/1QoeJt912K67kyxjHLie9JNTaY2422dlw/view?usp=sharing -->
+              <th>
+                <a
                   href="https://drive.google.com/file/d/1QoeJt912K67kyxjHLie9JNTaY2422dlw/view?usp=sharing"
                   target="_blank"
-                >Mei</a></th>
+                  >Mei</a
+                >
+              </th>
               <th>Juni</th>
               <th>Juli</th>
               <th>Agustus</th>
@@ -151,7 +163,7 @@
           <tbody></tbody>
         </table>
       </div>
-       <div class="position-relative">
+      <div class="position-relative">
         <button id="export-btn" class="btn btn-success shadow mt-3">
           Export ke Excel
         </button>
@@ -223,42 +235,65 @@
             loadingScreen.fadeOut(500, function () {
               content.fadeIn(500);
             });
+
             if (data.success && Array.isArray(data.data)) {
               data.data.forEach((item) => {
                 const kjkTahunan = sumHours(item);
+
                 function timeToSeconds(time) {
                   const [h, m, s] = time.split(":").map(Number);
                   return h * 3600 + m * 60 + s;
                 }
+
                 const isOverLimit =
                   timeToSeconds(kjkTahunan) > timeToSeconds("21:00:00");
 
-                // const isOverLimit = kjkTahunan > "21:00:00";
+                const bulan = [
+                  "Januari",
+                  "Februari",
+                  "Maret",
+                  "April",
+                  "Mei",
+                  "Juni",
+                  "Juli",
+                  "Agustus",
+                  "September",
+                  "Oktober",
+                  "November",
+                  "Desember",
+                ];
+
+                const bulanCells = bulan
+                  .map((month) => {
+                    const time = formatTime(item[month]);
+                    let style = "";
+
+                    if (time === "00:00:00") {
+                      style = ' style="background-color:#d4edda;"'; // hijau muda
+                    } else if (time === "-") {
+                      style = ' style="background-color:#f8d7da;"'; // merah muda
+                    }
+
+                    return `<td${style}>${time}</td>`;
+                  })
+                  .join("");
+
                 const row = `<tr>
-                              <td>${item.No}</td>
-                              <td style="text-align:left;" class="pegawai-name">${
-                                item.Nama_Pegawai
-                              }</td>
-                              <td>${formatTime(item.Januari)}</td>
-                              <td>${formatTime(item.Februari)}</td>
-                              <td>${formatTime(item.Maret)}</td>
-                              <td>${formatTime(item.April)}</td>
-                              <td>${formatTime(item.Mei)}</td>
-                              <td>${formatTime(item.Juni)}</td>
-                              <td>${formatTime(item.Juli)}</td>
-                              <td>${formatTime(item.Agustus)}</td>
-                              <td>${formatTime(item.September)}</td>
-                              <td>${formatTime(item.Oktober)}</td>
-                              <td>${formatTime(item.November)}</td>
-                              <td>${formatTime(item.Desember)}</td>
-                              <td class="${
-                                isOverLimit ? "text-danger" : ""
-                              }">${kjkTahunan}</td>
-                            </tr>`;
+                  <td>${item.No}</td>
+                  <td style="text-align:left;" class="pegawai-name">${
+                    item.Nama_Pegawai
+                  }</td>
+                  ${bulanCells}
+                  <td class="${
+                    isOverLimit ? "text-danger" : ""
+                  }">${kjkTahunan}</td>
+                </tr>`;
+
                 tableBody.append(row);
               });
             }
           });
+
         $("#export-btn").click(function () {
           let table = document.getElementById("data-table");
           let wb = XLSX.utils.book_new();
@@ -268,6 +303,7 @@
 
           XLSX.writeFile(wb, "Data_Pegawai.xlsx");
         });
+
         $("#search-box").on("keyup", function () {
           const value = $(this).val().toLowerCase();
           $("#data-table tbody tr").filter(function () {
@@ -282,6 +318,5 @@
         });
       });
     </script>
-<!--     https://docs.google.com/spreadsheets/d/1wOMmQtGdOG0vY2TYENj2BQG1gEqTB8SWMCSi4h2YWg0/edit?usp=sharing -->
   </body>
 </html>
